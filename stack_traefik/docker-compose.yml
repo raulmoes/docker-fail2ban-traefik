@@ -1,0 +1,31 @@
+version: '3.8'
+services:
+  traefik:
+    image: traefik:v2.2
+    container_name: traefik
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./traefik.toml:/traefik.toml
+      - ./traefik_dynamic.toml:/traefik_dynamic.toml
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./acme.json:/acme.json
+      - /var/log/traefik:/var/log
+    networks:
+      - web
+
+  fail2ban:
+    image: crazymax/fail2ban:latest
+    restart: unless-stopped
+    network_mode: "host"
+    cap_add:
+    - NET_ADMIN
+    - NET_RAW
+    volumes:
+    - /var/log:/var/log:ro
+    - ./fail2ban/data:/data
+
+networks:
+   web:
+    external: true
